@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <!-- 避免IE使用兼容模式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <!-- TopJUI框架样式 -->
+    <link type="text/css" href="../../topjui/themes/default/topjui.core.min.css" rel="stylesheet">
+    <link type="text/css" href="../../topjui/themes/default/topjui.blue.css" rel="stylesheet" id="dynamicTheme"/>
+    <!-- FontAwesome字体图标 -->
+    <link type="text/css" href="../../static/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+    <!-- layui框架样式 -->
+    <link type="text/css" href="../../static/plugins/layui/css/layui.css" rel="stylesheet"/>
+    <!-- jQuery相关引用 -->
+    <script type="text/javascript" src="../../static/plugins/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../../static/plugins/jquery/jquery.cookie.js"></script>
+    <!-- TopJUI框架配置 -->
+    <script type="text/javascript" src="../../static/public/js/topjui.config.js"></script>
+    <!-- TopJUI框架核心-->
+    <script type="text/javascript" src="../../topjui/js/topjui.core.min.js"></script>
+    <!-- TopJUI中文支持 -->
+    <script type="text/javascript" src="../../topjui/js/locale/topjui.lang.zh_CN.js"></script>
+    <!-- layui框架js -->
+    <script type="text/javascript" src="../../static/plugins/layui/layui.js" charset="utf-8"></script>
+</head>
+
+<body>
+<!-- datagrid表格 -->
+<table data-toggle="topjui-datagrid"
+       data-options="id: 'productDg',
+               fitColumns:true,
+               remoteSort:false,
+               url: '../../json/datagrid/product-list.json',
+               onClickCell:onClickCell,
+                ">
+    <thead>
+    <tr>
+        <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+        <th data-options="field:'name',title:'商品名称',sortable:true,width:100,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+        <th data-options="field:'code',title:'商品编号',sortable:true,width:50,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+        <th data-options="field:'spec',title:'规格型号',sortable:true,width:100,editor:{type:'combobox',
+        options:{required:true,height:30,textField:'code',valueField:'code',url:_ctx + '/json/dictionary/models.json'}}"></th>
+        <th data-options="field:'sale_price',title:'销售单价',sortable:true,width:50,editor:{type:'numberbox',options:{required:true,height:30,min:0,prefix:'￥',precision:2,groupSeparator:','}}"></th>
+        <th data-options="field:'rate',title:'完成率',sortable:true,editor:{type:'numberspinner',options:{required:true,spinAlign:'horizontal',height:30,min: 0,max: 100}},formatter:progressFormatter"></th>
+        <th data-options="field:'create_time',title:'生产日期',sortable:true,width:50,editor:{type:'datebox',options:{height:30}}"></th>
+    </tr>
+    </thead>
+</table>
+<!-- datagrid表格结束 -->
+<div id="productDg-toolbar" class="topjui-toolbar" data-options="
+       grid:{
+           type:'datagrid',
+           id:'productDg'
+       }" style="display:none">
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="
+           btnCls:'topjui-btn-green',
+           iconCls:'fa fa-plus',
+           onClick:addRow
+    ">新增</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="
+       btnCls:'topjui-btn-blue',
+       onClick:saveRow,
+       iconCls:'fa fa-save'">保存</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="
+       btnCls:'topjui-btn-brown',
+       onClick:rejectChanges,
+       iconCls:'fa fa-mail-reply'">撤销</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="
+       btnCls:'topjui-btn-red',
+       onClick:delRow,
+       iconCls:'fa fa-close'">删除</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="
+           btnCls:'topjui-btn-black',
+           onClick:getChanges,
+           iconCls:'fa fa-edit'">获取变更</a>
+</div>
+<script>
+
+  /**
+   * @description 格式化表格单元格中的进度信息
+   */
+  function progressFormatter(value, row, index) {
+    var htmlstr = '<div id="p" class="topjui-progressbar progressbar" data-options="value:' + value + '" style="width:300px; height: 26px;">';
+    htmlstr += '<div class="progressbar-text" style="width: 300px; height: 26px; line-height: 26px;">' + value + '%</div>';
+    htmlstr += '<div class="progressbar-value" style="width: ' + value + '%; height: 26px; line-height: 26px;">';
+    htmlstr += '</div>';
+    htmlstr += '</div>';
+    return htmlstr;
+  }
+
+  // --------- 1. 通用部分-------- 如需使用下面 2 或3 功能代码，请copy这部分
+
+  var editIndex = undefined;// 记录当前编辑行的index
+
+  // -------------2. 单元格编辑实现代码----------------------
+
+  /**
+   *@description 可编辑单元的操作对象，无特殊要求无需改动此处
+   */
+  var EditCell = {
+    selector: "",//表格的选择器
+    endEditing: function() {
+      if (editIndex == undefined) {
+        return true
+      }else if ($(this.selector).iDatagrid('validateRow', editIndex)) {// 验证指定的行，当验证有效的时候返回true
+        $(this.selector).iDatagrid('endEdit', editIndex);
+        editIndex = undefined;
+        return true;
+      } else {
+        return false;
+      }
+    },
+    edit:function (index,field) {
+      // 1.定义变量
+      var opts = $(this.selector).iDatagrid('options');//  获得表格的属性
+      var frozenFields = $(this.selector).iDatagrid('getColumnFields',true); // 获取冻结列
+      var fields = $(this.selector).iDatagrid('getColumnFields'); // 获取解冻列
+      fields = frozenFields.concat(fields); // 连接冻结列和解冻列的数组
+
+      // 2.遍历fields 确定点击状态cell的editor属性放出来 ， 非点击状态下cell的editor属性使用另一个变量保存
+      for(var i=0; i<fields.length; i++){
+        var col = $(this.selector).iDatagrid('getColumnOption', fields[i]); // 拿到列属性
+        col.editor1 = col.editor;// 新增列属性editor1保存editor
+        if (fields[i] != field){ //判断是否是被点击的cell 如果不是先将editor属性清除
+          col.editor = null;
+        }
+      }
+      // 3.开始编辑行
+      $(this.selector).iDatagrid('beginEdit', index);
+
+      // 4.还原editor属性
+      for(var i=0; i<fields.length; i++){
+        var col = $(this.selector).iDatagrid('getColumnOption', fields[i]);
+        col.editor = col.editor1;
+      }
+    },
+    innit:function(dataGridSelector,index,field){
+      this.selector = dataGridSelector;
+      if (this.endEditing()){
+        $(this.selector).iDatagrid('selectRow', index) ;
+        this.edit(index,field);
+        editIndex = index;
+      }
+    }
+  }
+
+  /**
+   * @description 点击单元格时候触发 此处配置表格的id选择器
+   */
+  function onClickCell(index, field) { // index 行编号 、 field字段名称
+    EditCell.innit("#productDg",index, field);   // TODO 注意修改选择器的ID
+  }
+
+  // -------------3. 按钮功能实现代码 -------------
+  var dg = '#productDg' ;//TODO 表格的id选择器
+  function addRow() {
+    if (endEditing()){
+      var index = 0 ;// 添加行的编号
+      // 1.插入一行
+      $(dg).iDatagrid('insertRow',{
+        index:index,   // 索引从0开始
+        row: {}
+      });
+      // 2.开启编辑状态
+      $(dg).iDatagrid('beginEdit', index);
+
+      // 3.选中当前行
+      $(dg).iDatagrid('selectRow', index);
+
+      editIndex = index;
+    }
+  }
+  function saveRow() {
+    if (endEditing()){
+      $(dg).datagrid('acceptChanges');
+    }
+  }
+  function delRow() {
+    var rows =  $(dg).iDatagrid('getChecked');
+    if(rows.length == 0){
+     return  $.iMessager.alert('操作提示', '未勾选需要删除的数据行！', 'messager-error'); // 未勾选的话弹出消息窗口
+    }
+    $.iMessager.confirm('确认','您确认想要删除这'+rows.length+'条记录吗？',function(r){
+      if (r){
+        var index = undefined;
+        $.each(rows,function (i) {
+          index = $(dg).iDatagrid('getRowIndex',rows[i]);
+          if (editIndex == undefined){
+            $(dg).iDatagrid('deleteRow', index)
+          }else if(editIndex == index ){
+            $(dg).iDatagrid('cancelEdit', editIndex).iDatagrid('deleteRow', editIndex);
+            editIndex = undefined;
+          }else{
+            $(dg).iDatagrid('deleteRow', index)
+          }
+        });
+      }
+    });
+    if (editIndex == undefined){return}
+
+  }
+  function endEditing() {
+    if (editIndex == undefined) {
+      return true
+    }else if ($(dg).iDatagrid('validateRow', editIndex)) {// 验证指定的行，当验证有效的时候返回true
+      $(dg).iDatagrid('endEdit', editIndex);
+      editIndex = undefined;
+      return true;
+    } else {
+      return false;
+    }
+  }
+  function rejectChanges(){
+    var rows = $(dg).datagrid('getChanges');
+    if(rows.length > 0 ){
+      $.iMessager.confirm('操作提示', '您确认撤回修改记录？', function (r) {
+        if(r){
+          $(dg).datagrid('rejectChanges');
+          editIndex = undefined;
+        }
+      });
+    }else{
+      $.iMessager.alert('操作提示', '您没有修改记录！', 'messager-info');
+    }
+
+  }
+  function getChanges() {
+    var rows =  $(dg).datagrid('getChanges')// 变更的数据
+    // var insertedRows = $(dg).datagrid('getChanges','inserted');// 插入的数据
+    // var deletedRows = $(dg).datagrid('getChanges','deleted');// 删除的数据
+    // var updatedRows = $(dg).datagrid('getChanges','updated');// 更新的数据
+    // console.log(insertedRows.length,deletedRows.length,updatedRows.length)
+    var msg = '您上次保存之后，变更数据' + rows.length + '行';
+    $.iMessager.alert('操作提示',msg , 'messager-info'); // 未勾选的话弹出消息窗口
+  }
+
+
+</script>
+</body>
+</html>
