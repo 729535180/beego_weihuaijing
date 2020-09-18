@@ -1,0 +1,96 @@
+
+<table data-toggle="topjui-treegrid"
+       data-options="id:'menuTg',
+        idField:'id',
+        treeField:'text',
+        url:'../menu/menu_json.html?id=0',
+        expandUrl:'../menu/menu_json.html?id={id}',
+        fitColumns:true">
+    <thead>
+    <tr>
+
+        <th data-options="field:'id',title:'编号',width:100"></th>
+        <th data-options="field:'text',title:'名称',width:200"></th>
+        <th data-options="field:'resourceType',title:'资源类别',formatter: function(value,row,index){
+                    if (value == 'menu'){
+                        return '菜单';
+                    } else if (value == 'window'){
+                        return '窗体';
+                    } else if (value == 'button'){
+                        return '按钮';
+                    } else if (value == 'url'){
+                        return '链接';
+                    } else {
+                        return value;
+                    }
+			    }"></th>
+        <th data-options="field:'url',title:'资源地址或标识'"></th>
+
+
+        <th data-options="field:'pid',title:'父级编号',width:100"></th>
+
+        <th data-options="field:'sort',title:'排序',width:100"></th>
+
+        <th data-options="field:'status',title:'状态',width:100,formatter:function(value,row,index){
+                    if (value == '1'){
+                        return '开启';
+                    } else if (value == 'window'){
+                        return '关闭';
+                    } else {
+                        return '-';
+                    }
+			    }"></th>
+    </tr>
+    </thead>
+</table>
+
+<!-- 表格工具栏开始 -->
+<div id="menuTg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'treegrid',
+           id:'menuTg',
+           parentIdField:'pid'
+       }">
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'openDialog',
+       extend: '#menuTg-toolbar',
+       iconCls: 'fa fa-plus',
+       dialog:{
+           id:'userAddDialog',
+           href:_ctx + '../../admin/menu/add.html',
+           buttonsGroup:[
+               {text:'保存',url:_ctx + '../../admin/menu/save.html',iconCls:'fa fa-plus',handler:'ajaxForm',btnCls:'topjui-btn-brown'}
+           ]
+       }">新增</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method: 'openDialog',
+            extend: '#menuTg-toolbar',
+            iconCls: 'fa fa-pencil',
+            btnCls: 'topjui-btn-green',
+            dialog: {
+                width: 950,
+                height: 500,
+                href: _ctx + '/html/complex/dialog_edit.html?id={id}',
+                url: _ctx + '/json/datagrid/product-detail.json?id={id}',
+                buttonsGroup: [
+                    {
+                        text: '更新',
+                        url: _ctx + '/json/response/success.json',
+                        iconCls: 'fa fa-save',
+                        handler: 'ajaxForm',
+                        btnCls: 'topjui-btn-green'
+                    }
+                ]
+            }">编辑</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'doAjax',
+       extend: '#menuTg-toolbar',
+       btnCls:'topjui-btn-brown',
+       iconCls:'fa fa-trash',
+       url:_ctx + '/json/response/success.json',
+       grid: {uncheckedMsg:'请先勾选要删除的数据',param:'id:id,codeSetId:codeSetId'}">删除</a>
+</div>
+<!-- 表格工具栏结束 -->
