@@ -19,7 +19,6 @@ func (b *baseController) Prepare() {
 	b.controllerName = "admin/" + strings.ToLower(controllerName[0:len(controllerName)-10])
 	b.actionName = strings.ToLower(actionName)
 	b.viewsTplName = b.controllerName + "/" + b.actionName + ".html"
-
 	b.Layout = "admin/layout.html"
 	b.o = orm.NewOrm()
 	b.TplName = b.viewsTplName
@@ -71,4 +70,14 @@ func (b *baseController) Erro(msg string, title string, code int) {
 
 	b.Data["json"] = re
 	b.ServeJSON()
+}
+
+//日志信息输出到页面上
+func (b *baseController) History(msg string, url string) {
+	if url == "" {
+		b.Ctx.WriteString("<script>alert('" + msg + "');window.history.go(-1);</script>")
+		b.StopRun()
+	} else {
+		b.Redirect(url, 302)
+	}
 }

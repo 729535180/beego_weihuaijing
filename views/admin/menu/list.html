@@ -9,7 +9,7 @@
     <thead>
     <tr>
 
-        <th data-options="field:'id',title:'编号',width:100"></th>
+        <th data-options="field:'id',title:'编号',checkbox:true,width:100"></th>
         <th data-options="field:'text',title:'名称',width:200"></th>
         <th data-options="field:'resourceType',title:'资源类别',formatter: function(value,row,index){
                     if (value == 'menu'){
@@ -34,7 +34,7 @@
         <th data-options="field:'status',title:'状态',width:100,formatter:function(value,row,index){
                     if (value == '1'){
                         return '开启';
-                    } else if (value == 'window'){
+                    } else if (value == '2'){
                         return '关闭';
                     } else {
                         return '-';
@@ -72,12 +72,12 @@
             dialog: {
                 width: 950,
                 height: 500,
-                href: _ctx + '/html/complex/dialog_edit.html?id={id}',
-                url: _ctx + '/json/datagrid/product-detail.json?id={id}',
+                href: _ctx + '../../admin/menu/edit.html?id={id}&type=html',
+                url: _ctx + '../../admin/menu/edit.html?id={id}&type=json',
                 buttonsGroup: [
                     {
                         text: '更新',
-                        url: _ctx + '/json/response/success.json',
+                        url: _ctx + '../../admin/menu/save.html',
                         iconCls: 'fa fa-save',
                         handler: 'ajaxForm',
                         btnCls: 'topjui-btn-green'
@@ -90,7 +90,7 @@
        extend: '#menuTg-toolbar',
        btnCls:'topjui-btn-brown',
        iconCls:'fa fa-trash',
-       url:_ctx + '/json/response/success.json',
-       grid: {uncheckedMsg:'请先勾选要删除的数据',param:'id:id,codeSetId:codeSetId'}">删除</a>
+       url:_ctx + '../../admin/menu/del.html',
+       grid: {uncheckedMsg:'请先勾选要删除的数据',param:'id:uid'}">删除</a>
 </div>
 <!-- 表格工具栏结束 -->

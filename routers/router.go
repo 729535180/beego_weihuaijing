@@ -27,7 +27,9 @@ func init() {
 			beego.NSRouter("/list", &admin.MenuController{}, "*:List"),
 			beego.NSRouter("/menu_json", &admin.MenuController{}, "*:DataJson"),
 			beego.NSRouter("/add", &admin.MenuController{}, "*:Add"),
+			beego.NSRouter("/edit", &admin.MenuController{}, "*:Edit"),
 			beego.NSRouter("/save", &admin.MenuController{}, "*:Save"),
+			beego.NSRouter("/del", &admin.MenuController{}, "*:Del"),
 		),
 		//角色组
 		beego.NSNamespace("/group"), //beego.NSRouter("/", &controllers.AdminGroupController{},"*:Index"),

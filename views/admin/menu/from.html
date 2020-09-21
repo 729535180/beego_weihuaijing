@@ -16,7 +16,7 @@
         <div class="topjui-col-sm12">
             <label class="topjui-form-label">地址</label>
             <div class="topjui-input-block">
-                <input type="text" name="url" data-toggle="topjui-textbox" data-options="required:true,prompt:'必填字段'">
+                <input type="text" name="url" data-toggle="topjui-textbox" data-options="required:false,prompt:'选填字段'">
             </div>
         </div>
     </div>
@@ -30,16 +30,20 @@
             </div>
         </div>
     </div>
-    <div class="topjui-row">
+
+
+
+    <div data-options="fit:true,iconCls:'icon-ok',footer:'#footer'" class="topjui-row">
         <div class="topjui-col-sm6">
             <label class="topjui-form-label">图标</label>
             <div class="topjui-input-block">
-                <input type="text" name="icon_cls" data-toggle="topjui-textbox"
-                       data-options="required:true,prompt:'必填字段'">
-
+                <input id="cc" name="icon_cls" style="width: 300px" data-toggle="topjui-iconpicker" value="fa fa-glass" type="text">
             </div>
         </div>
+
     </div>
+
+
     <div class="topjui-row">
         <div class="topjui-col-sm6">
             <label class="topjui-form-label">排序</label>
@@ -50,5 +54,5 @@
             </div>
         </div>
     </div>
-
+    <input type="hidden" name="id" value="0">
 </div>
