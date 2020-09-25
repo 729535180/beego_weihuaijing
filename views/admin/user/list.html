@@ -1,0 +1,113 @@
+<!-- layout布局 开始 -->
+
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',title:'',fit:true,split:true,border:false">
+        <!-- datagrid表格 -->
+        <table data-toggle="topjui-datagrid"
+               data-options="id: 'productDg',
+               fitColumns:true,
+               remoteSort:false,
+                url: '../user/list?type=json',
+                ">
+            <thead>
+            <tr>
+                <th data-options="field:'id',title:'ID',checkbox:true"></th>
+                <th data-options="field:'accounts',title:'帐号',sortable:true,width:100"></th>
+                <th data-options="field:'username',title:'用户名',sortable:true,width:100"></th>
+                <th data-options="field:'level',title:'级别',sortable:true,width:100,formatter: function(value,row,index){
+                    if (value == '1'){
+                        return '超级管理员';
+                    } else if (value == '2'){
+                        return '管理员';
+                    } else {
+                        return value;
+                    }
+			    }"></th>
+                <th data-options="field:'status',title:'状态',sortable:true,width:100,formatter: function(value,row,index){
+                    if (value == '1'){
+                        return '启用';
+                    } else if (value == '2'){
+                        return '禁用';
+                    } else {
+                        return value;
+                    }
+			    }"></th>
+                <th data-options="field:'create_time',title:'创建时间',sortable:true,width:100"></th>
+                <th data-options="field:'update_time',title:'更新时间',sortable:true,width:100"></th>
+                <th data-options="field:'operate',title:'操作',formatter:operateFormatter,width:80"></th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<!-- layout布局 结束 -->
+
+<!-- 表格工具栏开始 -->
+<div id="productDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'productDg'
+       }">
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'openDialog',
+       extend: '#productDg-toolbar',
+       iconCls: 'fa fa-plus',
+       dialog:{
+           id:'userAddDialog',
+           title:'多选项卡布局的表单',
+           href:_ctx + '/html/complex/dialog_add.html',
+           buttonsGroup:[
+               {text:'保存',url:_ctx + '/json/response/success.json',iconCls:'fa fa-plus',handler:'ajaxForm',btnCls:'topjui-btn-green'}
+           ]
+       }">新增</a>
+
+    <form id="queryForm" class="search-box">
+        <input type="text" name="name" data-toggle="topjui-textbox"
+               data-options="id:'name',prompt:'产品名称',width:100">
+        <input type="text" name="code" data-toggle="topjui-combobox"
+               data-options="id:'code',prompt:'产品型号',width:100,
+               valueField: 'label',
+               textField: 'value',
+               multiple: true,
+               data:[{
+                   label: 'java',
+                   value: 'Java'
+               },{
+                   label: 'perl',
+                   value: 'Perl'
+               },{
+                   label: 'ruby',
+                   value: 'Ruby'
+               }]">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'query',
+           iconCls:'fa fa-search',
+           btnCls:'topjui-btn-blue',
+           form:{id:'queryForm'},
+           grid:{type:'datagrid','id':'productDg'}">查询</a>
+    </form>
+</div>
+<!-- 表格工具栏结束 -->
+
+<script>
+
+
+    function progressFormatter(value, row, index) {
+        var htmlstr = '<div id="p" class="topjui-progressbar progressbar" data-options="value:' + value + '" style="width: 398px; height: 26px;">';
+        htmlstr += '<div class="progressbar-text" style="width: 398px; height: 26px; line-height: 26px;">' + value + '%</div>';
+        htmlstr += '<div class="progressbar-value" style="width: ' + value + '%; height: 26px; line-height: 26px;">';
+        htmlstr += '</div>';
+        htmlstr += '</div>';
+        return htmlstr;
+    }
+
+    function operateFormatter(value, row, index) {
+        var htmlstr = '<button class="layui-btn layui-btn-xs" onclick="openEditDiag(\'' + row.uuid + '\')">编辑</button>';
+        htmlstr += '<button class="layui-btn layui-btn-xs layui-btn-danger" onclick="deleteRow(\'' + row.uuid + '\')">删除</button>';
+        return htmlstr;
+    }
+
+
+</script>

@@ -2,6 +2,7 @@ package admin
 
 import (
 	"beego_weihuaijing/models"
+	"github.com/astaxie/beego/orm"
 	"time"
 )
 
@@ -27,9 +28,23 @@ func (m *MenuController) List() {
 }
 func (m *MenuController) DataJson() {
 	menuId, _ := m.GetInt("id")
+	lx := m.Input().Get("type")
 	var list []models.Menu
 	m.o.QueryTable(new(models.Menu).TableName()).Filter("status__in", 1, 2).Filter("pid", menuId).OrderBy("-MenuSort").All(&list)
 	var newListArray []*MenuJson
+	if menuId == 0 && lx == "of" {
+		newList := new(MenuJson)
+		newList.Id = 0
+		newList.Uid = 0
+		newList.Pid = 0
+		newList.Text = "主菜单"
+		newList.IconCls = ""
+		newList.Url = ""
+		newList.Sort = 0
+		newList.Status = 1
+		newList.State = "open"
+		newListArray = append(newListArray, newList)
+	}
 	for _, v := range list {
 		newList := new(MenuJson)
 		newList.Id = v.Id
@@ -41,12 +56,21 @@ func (m *MenuController) DataJson() {
 		newList.Sort = v.MenuSort
 		newList.Status = v.Status
 		if v.Url == "" {
-			newList.State = "closed"
+			if lx == "of" {
+				if newList.Pid > 0 {
+					newList.State = "open"
+				} else {
+					newList.State = "closed"
+				}
+			} else {
+				newList.State = "closed"
+			}
 		} else {
 			newList.State = "open"
 		}
 		newListArray = append(newListArray, newList)
 	}
+
 	if len(newListArray) < 1 {
 
 		xv := [][]int64{}
@@ -87,6 +111,7 @@ func (m *MenuController) Save() {
 	post.IconCls = m.Input().Get("icon_cls")
 	post.Status, _ = m.GetInt("status")
 	post.MenuSort, _ = m.GetInt("menu_sort")
+	post.Pid, _ = m.GetInt("pid")
 
 	post.UpdateTime = time.Now()
 
@@ -113,15 +138,19 @@ func (m *MenuController) Save() {
 }
 
 func (m *MenuController) Del() {
-	id, _ := m.GetInt("id")
-	if id == 0 {
+	id := m.Input().Get("id")
+	if id == "" {
 		m.Erro("ID值不能为空", "", 0)
 	} else {
 		post := models.Menu{}
 		post.UpdateTime = time.Now()
 		post.Status = 3
-		post.Id = id
-		if _, err := m.o.Update(&post, "Status", "UpdateTime"); err != nil {
+
+		_, err := m.o.QueryTable("tb_menu").Filter("id__in", id).Update(orm.Params{
+			"status":      3,
+			"update_time": time.Now(),
+		})
+		if err != nil {
 			m.History("删除数据出错"+err.Error(), "")
 		} else {
 			m.Succ("删除数据成功", "")

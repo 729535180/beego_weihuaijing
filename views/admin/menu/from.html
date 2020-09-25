@@ -6,6 +6,23 @@
     </fieldset>
     <div class="topjui-row">
         <div class="topjui-col-sm12">
+            <label class="topjui-form-label">所属机构</label>
+            <div class="topjui-input-block">
+                <input type="hidden" name="orgName">
+                <input type="text" name="pid"
+                       data-toggle="topjui-combotree"
+                       data-options="required:true,
+                       prompt:'必填',
+                       textField:'leader',
+                       url:'../menu/menu_json.html?id=0&type=of',
+                       expandUrl:'../menu/menu_json.html?id={id}&type=of',
+
+                       param:'orgName:text'">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm12">
             <label class="topjui-form-label">名称</label>
             <div class="topjui-input-block">
                 <input type="text" name="text" data-toggle="topjui-textbox" data-options="required:true,prompt:'必填字段'">
