@@ -11,21 +11,11 @@ type UserController struct {
 func (u *UserController) List() {
 	lx := u.Input().Get("type")
 	if lx == "json" {
-		var (
-			page   int
-			rows   int = 20
-			offset int
-		)
-		if page, _ = u.GetInt("page"); page < 1 {
-			page = 1
-		}
-		if rows, _ = u.GetInt("rows"); rows < 1 {
-			rows = 20
-		}
-		offset = (page - 1) * rows
-		var list []models.AdminUser
-		u.o.QueryTable(new(models.AdminUser).TableName()).Filter("status__in", 1, 2).Limit(rows, offset).All(&list)
 		sl, _ := u.o.QueryTable(new(models.AdminUser).TableName()).Filter("status__in", 1, 2).Count()
+		page := u.PageBase(int(sl))
+		var list []models.AdminUser
+		u.o.QueryTable(new(models.AdminUser).TableName()).Filter("status__in", 1, 2).Limit(page["rows"], page["offset"]).All(&list)
+
 		res := new(models.AdminUserPage)
 		res.Rows = list
 		res.Total = int(sl)

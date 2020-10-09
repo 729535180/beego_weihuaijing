@@ -3,6 +3,7 @@ package admin
 import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"math"
 	"strings"
 )
 
@@ -33,6 +34,7 @@ type comReturn struct {
 	Message    string `json:"message"`
 }
 
+//topjui  操作成功返回
 func (b *baseController) Succ(msg string, title string) {
 	re := new(comReturn)
 	if msg == "" {
@@ -50,6 +52,7 @@ func (b *baseController) Succ(msg string, title string) {
 	b.ServeJSON()
 }
 
+//topjui  操作失败返回
 func (b *baseController) Erro(msg string, title string, code int) {
 	re := new(comReturn)
 	if msg == "" {
@@ -80,4 +83,46 @@ func (b *baseController) History(msg string, url string) {
 	} else {
 		b.Redirect(url, 302)
 	}
+}
+
+/*
+page 当前页数
+rows 每页数量
+nums 数据总量
+*/
+func (b *baseController) PageBase(nums int) map[string]interface{} {
+
+	var offset, totalpage, lastpage, firstpage, next, prev, page, rows int
+	if page, _ = b.GetInt("page"); page < 1 {
+		page = 1
+	}
+	if rows, _ = b.GetInt("rows"); rows < 1 {
+		rows = 20
+	}
+	totalpage = int(math.Ceil(float64(nums / rows)))
+	lastpage = totalpage
+	firstpage = 1
+
+	offset = (page - 1) * rows
+	if (page + 1) > totalpage {
+		next = totalpage
+	} else {
+		next = page + 1
+	}
+	if (page - 1) <= 0 {
+		prev = 1
+	} else {
+		prev = page - 1
+	}
+	pageMap := make(map[string]interface{})
+	pageMap["totalpage"] = totalpage //总页数
+	pageMap["lastpage"] = lastpage   //最后一页
+	pageMap["firstpage"] = firstpage //最开始一页
+	pageMap["page"] = page           //当前页
+	pageMap["rows"] = rows           //每页数量
+	pageMap["offset"] = offset       //数据库开始位置
+	pageMap["next"] = next           //下一页
+	pageMap["prev"] = prev           //上一页
+
+	return pageMap
 }
