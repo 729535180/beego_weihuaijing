@@ -20,6 +20,8 @@ func init() {
 		beego.NSNamespace("/user",
 			beego.NSRouter("/", &admin.UserController{}, "*:List"),
 			beego.NSRouter("/list", &admin.UserController{}, "*:List"),
+			beego.NSRouter("/add", &admin.UserController{}, "*:Add"),
+			beego.NSRouter("/save", &admin.UserController{}, "*:Save"),
 		),
 		// 菜单列表
 		beego.NSNamespace("/menu",

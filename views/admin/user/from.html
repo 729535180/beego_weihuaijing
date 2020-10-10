@@ -1,0 +1,53 @@
+
+
+<div class="topjui-fluid">
+    <fieldset>
+        <legend>用户信息</legend>
+    </fieldset>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">级别</label>
+            <div class="topjui-input-block">
+                <input type="text" name="level"
+                       data-toggle="topjui-combobox"
+                       data-options="required:true,data:[{value:1,text:'超级管理员'},{value:2,text:'普通用户'}]">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">帐号</label>
+            <div class="topjui-input-block">
+                <input type="text" name="accounts" data-toggle="topjui-textbox" data-options="required:true,prompt:'帐号,登录账号'">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">密码</label>
+            <div class="topjui-input-block">
+                <input type="text" name="password" data-toggle="topjui-passwordbox" data-options="required:true,prompt:'登录密码'">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">用户名</label>
+            <div class="topjui-input-block">
+                <input type="text" name="username" data-toggle="topjui-textbox" data-options="required:true,prompt:'用户名,显示信息'">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">状态</label>
+            <div class="topjui-input-block" style="padding-top: 4px;">
+                <input name="status" data-toggle="topjui-radiobutton" data-options="value:'1',label:'开启',labelPosition:'after',checked:true">
+                <input name="status" data-toggle="topjui-radiobutton" data-options="value:'2',label:'关闭'">
+
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" name="id" value="0">
+</div>

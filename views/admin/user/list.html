@@ -11,7 +11,7 @@
                 ">
             <thead>
             <tr>
-                <th data-options="field:'id',title:'ID',checkbox:true"></th>
+
                 <th data-options="field:'accounts',title:'帐号',sortable:true,width:100"></th>
                 <th data-options="field:'username',title:'用户名',sortable:true,width:100"></th>
                 <th data-options="field:'level',title:'级别',sortable:true,width:100,formatter: function(value,row,index){
@@ -55,10 +55,10 @@
        iconCls: 'fa fa-plus',
        dialog:{
            id:'userAddDialog',
-           title:'多选项卡布局的表单',
-           href:_ctx + '/html/complex/dialog_add.html',
+           title:'新增用户',
+           href:_ctx + '../../admin/user/add.html',
            buttonsGroup:[
-               {text:'保存',url:_ctx + '/json/response/success.json',iconCls:'fa fa-plus',handler:'ajaxForm',btnCls:'topjui-btn-green'}
+               {text:'保存',url:_ctx + '../../admin/user/save.html',iconCls:'fa fa-plus',handler:'ajaxForm',btnCls:'topjui-btn-green'}
            ]
        }">新增</a>
 
