@@ -3,7 +3,7 @@ package admin
 import (
 	"beego_weihuaijing/models"
 	"fmt"
-	"github.com/astaxie/beego/logs"
+	"strings"
 	"time"
 )
 
@@ -45,10 +45,12 @@ func (g *GroupController) Add() {
 	g.TplName = g.controllerName + "/from.html"
 }
 func (g *GroupController) Save() {
-	ids := g.GetStrings("ids")
-	fmt.Println(ids)
-	logs.Error("sssssss", ids)
+	access := g.GetStrings("ids[]")
+
 	post := models.Group{}
+	if len(access) > 0 {
+		post.Access = strings.Replace(strings.Trim(fmt.Sprint(access), "[]"), " ", ",", -1)
+	}
 	post.GroupName = g.Input().Get("group_name")
 	post.Status, _ = g.GetInt("status")
 	post.UpdateTime = time.Now()
