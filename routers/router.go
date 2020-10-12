@@ -22,6 +22,8 @@ func init() {
 			beego.NSRouter("/list", &admin.UserController{}, "*:List"),
 			beego.NSRouter("/add", &admin.UserController{}, "*:Add"),
 			beego.NSRouter("/save", &admin.UserController{}, "*:Save"),
+			beego.NSRouter("/edit", &admin.UserController{}, "*:Edit"),
+			beego.NSRouter("/del", &admin.UserController{}, "*:Del"),
 		),
 		// 菜单列表
 		beego.NSNamespace("/menu",
@@ -34,7 +36,12 @@ func init() {
 			beego.NSRouter("/del", &admin.MenuController{}, "*:Del"),
 		),
 		//角色组
-		beego.NSNamespace("/group"), //beego.NSRouter("/", &controllers.AdminGroupController{},"*:Index"),
+		beego.NSNamespace("/group",
+			beego.NSRouter("/", &admin.GroupController{}, "*:List"),
+			beego.NSRouter("/list", &admin.GroupController{}, "*:List"),
+			beego.NSRouter("/add", &admin.GroupController{}, "*:Add"),
+			beego.NSRouter("/save", &admin.GroupController{}, "*:Save"),
+		), //beego.NSRouter("/", &controllers.AdminGroupController{},"*:Index"),
 		//beego.NSRouter("/create", &controllers.AdminGroupController{},"*:Create"),
 
 		//管理员日志

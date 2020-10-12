@@ -11,6 +11,7 @@ type MenuController struct {
 }
 type MenuJson struct {
 	Id      int    `json:"id"`
+	Ids     int    `json:"ids[]"`
 	Pid     int    `json:"pid"`
 	Text    string `json:"text"`
 	State   string `json:"state"`
@@ -35,6 +36,7 @@ func (m *MenuController) DataJson() {
 	if menuId == 0 && lx == "of" {
 		newList := new(MenuJson)
 		newList.Id = 0
+		newList.Ids = 0
 		newList.Uid = 0
 		newList.Pid = 0
 		newList.Text = "主菜单"
@@ -48,6 +50,7 @@ func (m *MenuController) DataJson() {
 	for _, v := range list {
 		newList := new(MenuJson)
 		newList.Id = v.Id
+		newList.Ids = v.Id
 		newList.Uid = v.Id
 		newList.Pid = v.Pid
 		newList.Text = v.Text

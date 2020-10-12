@@ -63,23 +63,17 @@
        }">新增</a>
 
     <form id="queryForm" class="search-box">
+        <input type="text" name="accounts" data-toggle="topjui-textbox"
+               data-options="id:'accounts',prompt:'帐号',width:100">
         <input type="text" name="name" data-toggle="topjui-textbox"
-               data-options="id:'name',prompt:'产品名称',width:100">
-        <input type="text" name="code" data-toggle="topjui-combobox"
-               data-options="id:'code',prompt:'产品型号',width:100,
-               valueField: 'label',
-               textField: 'value',
-               multiple: true,
-               data:[{
-                   label: 'java',
-                   value: 'Java'
-               },{
-                   label: 'perl',
-                   value: 'Perl'
-               },{
-                   label: 'ruby',
-                   value: 'Ruby'
-               }]">
+               data-options="id:'name',prompt:'帐号或用户名称',width:100">
+        <input type="text" name="level"
+               data-toggle="topjui-combobox"
+               data-options="id:'level',prompt:'级别',width:100,data:[{value:1,text:'超级管理员'},{value:2,text:'普通用户'}]">
+        <input type="text" name="status"
+               data-toggle="topjui-combobox"
+               data-options="id:'status',prompt:'状态',width:100,data:[{value:1,text:'启用'},{value:2,text:'禁用'}]">
+
         <a href="javascript:void(0)"
            data-toggle="topjui-menubutton"
            data-options="method:'query',
@@ -104,10 +98,95 @@
     }
 
     function operateFormatter(value, row, index) {
-        var htmlstr = '<button class="layui-btn layui-btn-xs" onclick="openEditDiag(\'' + row.uuid + '\')">编辑</button>';
-        htmlstr += '<button class="layui-btn layui-btn-xs layui-btn-danger" onclick="deleteRow(\'' + row.uuid + '\')">删除</button>';
+        var htmlstr = '<button class="layui-btn layui-btn-xs" onclick="openEditDiag(\'' + row.id + '\')">编辑</button>';
+        htmlstr += '<button class="layui-btn layui-btn-xs layui-btn-danger" onclick="deleteRow(\'' + row.id + '\')">删除</button>';
         return htmlstr;
     }
 
+    function openEditDiag(uuid) {
+        var $editDialog = $('<form  id="myDialog" method="get"></form>'); // 创建form表单元素
+        $editDialog.iDialog({
+            title: '编辑数据',
+            width: 950,
+            height: 500,
+            closed: false,
+            cache: false,
+            href: _ctx + '../../admin/user/edit.html?type=html&id=' + uuid,
+            modal: true,
+            buttons: [{
+                text: '保存',
+                iconCls: 'fa fa-save',
+                btnCls: 'topjui-btn-blue',
+                handler:ajaxSubmit // 调用下面自定义方法ajaxSubmit()
+            }, {
+                text: '关闭',
+                iconCls: 'fa fa-close',
+                btnCls: 'topjui-btn-red',
+                handler: function () {
+                    $editDialog.iDialog('close');
+                }
+            }],
+            onLoad: function () {
+                //加载表单数据
+                $.getJSON(_ctx + '../../admin/user/edit.html?id=' + uuid, function (data) {
+                    $editDialog.form('load', data);
+                });
+            }
+        });
+    }
+    function ajaxSubmit() {
+
+        // 2 提交
+        // 2.1 方式一 上面 $('<form ></form>')
+        if($('#myDialog').form('validate')) {
+            var formData = $("#myDialog").serialize();
+            var url = _ctx + '../../admin/user/save.html';
+            $.post(url,formData,function (res) {
+                if (res.statusCode == 200) { // 后台返回状态值
+                    $.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
+                    $("#productDg").iDatagrid('reload');// 刷新下表格数据
+                    $('#myDialog').dialog('destroy');// 销毁dialog面板
+                } else {
+                    $.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
+                }
+            },'JSON')
+        }
+
+
+    }
+
+    function deleteRow(uuid) {
+        $.iMessager.confirm('确认对话框', '您确定删除所选的数据？', function (r) {
+            if(r){
+                var postData = { id: uuid}; // 请求中携带的JSON数据
+                var url =  _ctx + '../../admin/user/del.html';//请求的地址
+                $.post(url,postData,function (res) {
+                    $.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
+                    if(res.statusCode == 200){
+                        $("#productDg").iDatagrid('reload');//请求成功后刷新表格
+                    }
+                },"JSON")
+            }
+        });
+        // $.iMessager.alert('操作提示', '请根据具体情况编写代码，如ajax删除请求，请求失败提示，请求成功提示，请求成功后刷新表格等！', 'messager-info');
+    }
+
+    // 自定义方法
+    function myQuery() {
+        // 提示信息
+        $.iMessager.alert('自定义方法', '自定义方法被执行了！', 'messager-info');
+
+        var checkedRows = $('#productDg').iDatagrid('getChecked');
+        console.log(checkedRows);
+
+        var selectedRow = $('#productDg').iDatagrid('getSelected');
+        console.log(selectedRow);
+
+        // 提交参数查询表格数据
+        $('#productDg').iDatagrid('reload', {
+            name: $('#name').iTextbox('getValue'),
+            code: $('#code').iTextbox('getValue')
+        });
+    }
 
 </script>

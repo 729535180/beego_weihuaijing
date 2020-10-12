@@ -1,0 +1,83 @@
+
+
+<div class="topjui-fluid">
+
+    <fieldset>
+        <legend>组信息</legend>
+    </fieldset>
+
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">用户组名称</label>
+            <div class="topjui-input-block">
+                <input type="text" name="group_name" data-toggle="topjui-textbox" data-options="required:true,prompt:'用户组名称'">
+            </div>
+        </div>
+    </div>
+
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">状态</label>
+            <div class="topjui-input-block" style="padding-top: 4px;">
+                <input name="status" data-toggle="topjui-radiobutton" data-options="value:'1',label:'开启',labelPosition:'after',checked:true">
+                <input name="status" data-toggle="topjui-radiobutton" data-options="value:'2',label:'关闭'">
+
+            </div>
+        </div>
+    </div>
+    <fieldset>
+        <legend>权限选择</legend>
+    </fieldset>
+    <table data-toggle="topjui-treegrid"
+           data-options="id:'menuTg',
+        idField:'id',
+        treeField:'text',
+        url:'../menu/menu_json.html?id=0',
+        expandUrl:'../menu/menu_json.html?id={id}',
+        fitColumns:true,
+
+        ">
+        <thead>
+        <tr>
+
+            <th data-options="field:'ids[]',title:'编号',checkbox:true,width:100"></th>
+            <th data-options="field:'text',title:'名称',width:200"></th>
+            <th data-options="field:'resourceType',title:'资源类别',formatter: function(value,row,index){
+                    if (value == 'menu'){
+                        return '菜单';
+                    } else if (value == 'window'){
+                        return '窗体';
+                    } else if (value == 'button'){
+                        return '按钮';
+                    } else if (value == 'url'){
+                        return '链接';
+                    } else {
+                        return value;
+                    }
+			    }"></th>
+            <th data-options="field:'url',title:'资源地址或标识'"></th>
+
+
+            <th data-options="field:'pid',title:'父级编号',width:100"></th>
+
+            <th data-options="field:'sort',title:'排序',width:100"></th>
+
+            <th data-options="field:'status',title:'状态',width:100,formatter:function(value,row,index){
+                    if (value == '1'){
+                        return '开启';
+                    } else if (value == '2'){
+                        return '关闭';
+                    } else {
+                        return '-';
+                    }
+			    }"></th>
+        </tr>
+        </thead>
+    </table>
+    <input type="hidden" name="id" value="0">
+</div>
+<script>
+    function gd(){
+        alert(1);
+    }
+</script>
