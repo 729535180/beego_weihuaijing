@@ -127,9 +127,21 @@
                 }
             }],
             onLoad: function () {
+
                 //加载表单数据
                 $.getJSON(_ctx + '../../admin/user/edit.html?id=' + uuid, function (data) {
                     $editDialog.form('load', data);
+                    if(data.group_id != "") {
+                        szxx = data.group_id.split(',');
+                        $("[name='group_id']").each(function () {
+                            if (szxx.indexOf($(this).val()) > -1) {
+
+                                $(this).iCheckbox({checked:true});
+
+                            }
+                        })
+                    }
+
                 });
             }
         });

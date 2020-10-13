@@ -2,7 +2,9 @@ package admin
 
 import (
 	"beego_weihuaijing/models"
+	"fmt"
 	"github.com/astaxie/beego/orm"
+	"strings"
 	"time"
 )
 
@@ -10,12 +12,28 @@ type UserController struct {
 	baseController
 }
 
+func (u *UserController) GroupData() error {
+	var list []models.Group
+	u.o.QueryTable(new(models.Group).TableName()).Filter("status__in", 1).All(&list)
+	u.Data["group_list"] = list
+
+	return nil
+}
+
 func (u *UserController) Add() {
+	if err := u.GroupData(); err != nil {
+		u.Erro("读取数据出错"+err.Error(), "", 0)
+	}
+	u.Data["password"] = true
 	u.TplName = u.controllerName + "/from.html"
 }
 func (u *UserController) Edit() {
 	lx := u.Input().Get("type")
 	if lx == "html" {
+		if err := u.GroupData(); err != nil {
+			u.Erro("读取数据出错"+err.Error(), "", 0)
+		}
+		u.Data["password"] = false
 		u.TplName = u.controllerName + "/from.html"
 	} else {
 		id, _ := u.GetInt("id")
@@ -25,6 +43,7 @@ func (u *UserController) Edit() {
 
 			cate := models.AdminUser{Id: id}
 			u.o.Read(&cate)
+			cate.Password = ""
 			u.Data["json"] = cate
 			u.ServeJSON()
 		}
@@ -32,14 +51,22 @@ func (u *UserController) Edit() {
 	//m.Succ("", "")
 }
 func (u *UserController) Save() {
+	id, _ := u.GetInt("id")
 	post := models.AdminUser{}
 	post.Accounts = u.Input().Get("accounts")
-	post.Password = u.Input().Get("password")
 	post.Username = u.Input().Get("username")
 	post.Level, _ = u.GetInt("level")
 	post.Status, _ = u.GetInt("status")
 	post.UpdateTime = time.Now()
-	id, _ := u.GetInt("id")
+	groupId := u.GetStrings("group_id")
+	if len(groupId) > 0 {
+		post.GroupId = strings.Replace(strings.Trim(fmt.Sprint(groupId), "[]"), " ", ",", -1)
+	}
+	post.Password = u.Input().Get("password")
+	if post.Password != "" {
+		post.Password = MyMd5(post.Password)
+	}
+
 	if id == 0 {
 		post.CreateTime = time.Now()
 		if _, err := u.o.Insert(&post); err != nil {
@@ -49,11 +76,19 @@ func (u *UserController) Save() {
 		}
 	} else {
 		post.Id = id
-		post.CreateTime = time.Now()
-		if _, err := u.o.Update(&post); err != nil {
-			u.History("更新数据出错"+err.Error(), "")
+		post.UpdateTime = time.Now()
+		if post.Password == "" {
+			if _, err := u.o.Update(&post, "Accounts", "Username", "GroupId", "Level", "Status", "UpdateTime"); err != nil {
+				u.Erro("更新数据出错"+err.Error(), "", 0)
+			} else {
+				u.Succ("更新数据成功", "")
+			}
 		} else {
-			u.Succ("更新数据成功", "")
+			if _, err := u.o.Update(&post, "Accounts", "Password", "Username", "GroupId", "Level", "Status", "UpdateTime"); err != nil {
+				u.Erro("更新数据出错"+err.Error(), "", 0)
+			} else {
+				u.Succ("更新数据成功", "")
+			}
 		}
 	}
 }

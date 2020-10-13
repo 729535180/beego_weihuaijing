@@ -7,7 +7,7 @@
                data-options="id: 'productDg',
                fitColumns:true,
                remoteSort:false,
-                url: '../group/list?type=json',
+               url: '../group/list?type=json',
                 ">
             <thead>
             <tr>
@@ -100,7 +100,7 @@
             height: 500,
             closed: false,
             cache: false,
-            href: _ctx + '../../admin/user/edit.html?type=html&id=' + uuid,
+            href: _ctx + '../../admin/group/edit.html?type=html&id=' + uuid,
             modal: true,
             buttons: [{
                 text: '保存',
@@ -116,10 +116,25 @@
                 }
             }],
             onLoad: function () {
-                //加载表单数据
-                $.getJSON(_ctx + '../../admin/user/edit.html?id=' + uuid, function (data) {
-                    $editDialog.form('load', data);
-                });
+                setTimeout(function () {
+                    //内容3秒后执行
+                    //加载表单数据
+                    $.getJSON(_ctx + '../../admin/group/edit.html?id=' + uuid, function (data) {
+                        $editDialog.form('load', data);
+                        //console.log(data);
+                        if(data.access != "") {
+                            szxx = data.access.split(',');
+                            $("[name='ids[]']").each(function () {
+                                if (szxx.indexOf($(this).val()) > -1) {
+
+                                    $('#menuTg').datagrid('checkRow',$(this).val());
+
+                                }
+                            })
+                        }
+                    });
+                }, 1000);
+
             }
         });
     }
@@ -129,7 +144,7 @@
         // 2.1 方式一 上面 $('<form ></form>')
         if($('#myDialog').form('validate')) {
             var formData = $("#myDialog").serialize();
-            var url = _ctx + '../../admin/user/save.html';
+            var url = _ctx + '../../admin/group/save.html';
             $.post(url,formData,function (res) {
                 if (res.statusCode == 200) { // 后台返回状态值
                     $.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
@@ -148,7 +163,7 @@
         $.iMessager.confirm('确认对话框', '您确定删除所选的数据？', function (r) {
             if(r){
                 var postData = { id: uuid}; // 请求中携带的JSON数据
-                var url =  _ctx + '../../admin/user/del.html';//请求的地址
+                var url =  _ctx + '../../admin/group/del.html';//请求的地址
                 $.post(url,postData,function (res) {
                     $.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
                     if(res.statusCode == 200){

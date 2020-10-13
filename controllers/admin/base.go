@@ -1,7 +1,10 @@
 package admin
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"math"
 	"strings"
@@ -12,6 +15,7 @@ type baseController struct {
 	controllerName string
 	actionName     string
 	viewsTplName   string
+	rouleName      string
 	o              orm.Ormer
 }
 
@@ -20,11 +24,20 @@ func (b *baseController) Prepare() {
 	b.controllerName = "admin/" + strings.ToLower(controllerName[0:len(controllerName)-10])
 	b.actionName = strings.ToLower(actionName)
 	b.viewsTplName = b.controllerName + "/" + b.actionName + ".html"
+	b.rouleName = strings.ToLower(controllerName[0:len(controllerName)-10]) + "/" + b.actionName
 	b.Layout = "admin/layout.html"
 	b.o = orm.NewOrm()
 	b.TplName = b.viewsTplName
-	//logs.Error("controller====", b.controllerName)
-	//logs.Error("action====", b.actionName)
+	if b.rouleName == "login/index" || b.rouleName == "login/logout" {
+
+	} else {
+		if b.GetSession("admin_user_go") == nil {
+			b.History("未登录", "/admin/login/index")
+		} else {
+
+		}
+	}
+	logs.Error("rouleName====", b.rouleName)
 
 }
 
@@ -85,6 +98,12 @@ func (b *baseController) History(msg string, url string) {
 	}
 }
 
+//获取用户IP地址
+func (b *baseController) getClientIp() string {
+	s := strings.Split(b.Ctx.Request.RemoteAddr, ":")
+	return s[0]
+}
+
 /*
 page 当前页数
 rows 每页数量
@@ -125,4 +144,13 @@ func (b *baseController) PageBase(nums int) map[string]interface{} {
 	pageMap["prev"] = prev           //上一页
 
 	return pageMap
+}
+
+/*
+md5加密
+*/
+func MyMd5(s string) string {
+	m := md5.New()
+	m.Write([]byte(s))
+	return hex.EncodeToString(m.Sum(nil))
 }

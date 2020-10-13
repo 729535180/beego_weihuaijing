@@ -135,7 +135,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
                                 <input type="text" id="username" name="username" class="form-control" placeholder="用户名"
-                                       value="topjui">
+                                       value="">
                             </div>
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
                                 <input type="password" id="password" name="password" class="form-control"
-                                       placeholder="密码" value="topjui">
+                                       placeholder="密码" value="">
                             </div>
                         </div>
                     </div>
@@ -223,7 +223,7 @@
                 };
                 $.ajax({
                     type: 'POST',
-                    url: '/json/response/login.json',
+                    url: '../../admin/login/index.html',
                     contentType: "application/json; charset=utf-8",
                     data: JSON.stringify(formData),
                     success: function (data) {

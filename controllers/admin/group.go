@@ -3,6 +3,7 @@ package admin
 import (
 	"beego_weihuaijing/models"
 	"fmt"
+	"github.com/astaxie/beego/orm"
 	"strings"
 	"time"
 )
@@ -44,6 +45,24 @@ func (g *GroupController) List() {
 func (g *GroupController) Add() {
 	g.TplName = g.controllerName + "/from.html"
 }
+func (g *GroupController) Edit() {
+	lx := g.Input().Get("type")
+	if lx == "html" {
+		g.TplName = g.controllerName + "/from.html"
+	} else {
+		id, _ := g.GetInt("id")
+		if id == 0 {
+			g.Erro("ID值不能为空", "", 0)
+		} else {
+
+			cate := models.Group{Id: id}
+			g.o.Read(&cate)
+			g.Data["json"] = cate
+			g.ServeJSON()
+		}
+	}
+	//m.Succ("", "")
+}
 func (g *GroupController) Save() {
 	access := g.GetStrings("ids[]")
 
@@ -69,6 +88,26 @@ func (g *GroupController) Save() {
 			g.History("更新数据出错"+err.Error(), "")
 		} else {
 			g.Succ("更新数据成功", "")
+		}
+	}
+}
+func (g *GroupController) Del() {
+	id := g.Input().Get("id")
+	if id == "" {
+		g.Erro("ID值不能为空", "", 0)
+	} else {
+		post := models.Group{}
+		post.UpdateTime = time.Now()
+		post.Status = 3
+
+		_, err := g.o.QueryTable("tb_group").Filter("id__in", id).Update(orm.Params{
+			"status":      3,
+			"update_time": time.Now(),
+		})
+		if err != nil {
+			g.History("删除数据出错"+err.Error(), "")
+		} else {
+			g.Succ("删除数据成功", "")
 		}
 	}
 }

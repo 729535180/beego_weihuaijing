@@ -22,19 +22,40 @@
             </div>
         </div>
     </div>
-    <div class="topjui-row">
-        <div class="topjui-col-sm6">
-            <label class="topjui-form-label">密码</label>
-            <div class="topjui-input-block">
-                <input type="text" name="password" data-toggle="topjui-passwordbox" data-options="required:true,prompt:'登录密码'">
+    {{if .password}}
+        <div class="topjui-row">
+            <div class="topjui-col-sm6">
+                <label class="topjui-form-label">密码</label>
+                <div class="topjui-input-block">
+                    <input type="text" name="password" data-toggle="topjui-passwordbox" data-options="required:true,prompt:'登录密码'">
+                </div>
             </div>
         </div>
-    </div>
+    {{else}}
+        <div class="topjui-row">
+            <div class="topjui-col-sm6">
+                <label class="topjui-form-label">密码</label>
+                <div class="topjui-input-block">
+                    <input type="text" name="password" data-toggle="topjui-passwordbox" data-options="required:false,prompt:'登录密码,空，默认不修改密码'">
+                </div>
+            </div>
+        </div>
+    {{end}}
     <div class="topjui-row">
         <div class="topjui-col-sm6">
             <label class="topjui-form-label">用户名</label>
             <div class="topjui-input-block">
                 <input type="text" name="username" data-toggle="topjui-textbox" data-options="required:true,prompt:'用户名,显示信息'">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm12">
+            <label class="topjui-form-label">组权限:  </label>
+            <div class="topjui-input-block">
+                {{range $k, $v := .group_list}}
+                <input data-toggle="topjui-checkbox" name="group_id" value="{{$v.Id}}" label="{{$v.GroupName}}">
+                {{end}}
             </div>
         </div>
     </div>
