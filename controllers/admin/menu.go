@@ -70,7 +70,7 @@ func (m *MenuController) DataJson() {
 				newList.State = "closed"
 			}
 		} else {
-			newList.State = "open"
+			newList.State = "closed"
 		}
 		newListArray = append(newListArray, newList)
 	}
