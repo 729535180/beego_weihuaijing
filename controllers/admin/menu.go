@@ -3,6 +3,7 @@ package admin
 import (
 	"beego_weihuaijing/models"
 	"github.com/astaxie/beego/orm"
+	"strconv"
 	"time"
 )
 
@@ -61,7 +62,7 @@ func (m *MenuController) DataJson() {
 		if v.Url == "" {
 			if lx == "of" {
 				if newList.Pid > 0 {
-					newList.State = "open"
+					newList.State = "closed"
 				} else {
 					newList.State = "closed"
 				}
@@ -117,6 +118,19 @@ func (m *MenuController) Save() {
 	post.Pid, _ = m.GetInt("pid")
 
 	post.UpdateTime = time.Now()
+	if post.Pid > 0 {
+		cate := models.Menu{Id: post.Pid}
+		m.o.Read(&cate, "id")
+		if cate.Id != 0 {
+			if cate.Path == "0" {
+				post.Path = strconv.Itoa(cate.Id)
+			} else {
+				post.Path = cate.Path + "," + strconv.Itoa(cate.Id)
+			}
+		}
+	} else {
+		post.Path = "0"
+	}
 
 	id, _ := m.GetInt("id")
 	if id == 0 {

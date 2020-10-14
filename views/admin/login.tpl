@@ -168,7 +168,7 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-body">
-                <span class="text-danger"><i class="fa fa-warning"></i> 用户名或密码错误，请重试！</span>
+                <span class="text-danger" id="show_msg"><i class="fa fa-warning"></i> 用户名或密码错误，请重试！</span>
             </div>
         </div>
     </div>
@@ -216,23 +216,22 @@
             ) {
                 alert("您的浏览器版本过低，请使用360安全浏览器的极速模式或IE9.0以上版本的浏览器");
             } else {
-                var formData = {
-                    username: $('#username').val(),
-                    password: $('#password').val(),
-                    referer: $('#referer').val()
-                };
+
+                username = $('#username').val();
+                password = $('#password').val();
                 $.ajax({
                     type: 'POST',
                     url: '../../admin/login/index.html',
-                    contentType: "application/json; charset=utf-8",
-                    data: JSON.stringify(formData),
+                    data: {username:username,password:password},
                     success: function (data) {
                         if (data.statusCode == 200) {
-                            //location.href = '/system/index/index?portal=${portal}';
-                            location.href = data.referer;
+                            location.href = '../../admin/index';
+
                         } else {
+                            $('#show_msg').html(data.message);
+                            //alert(data.message);
                             $('#myModal').modal();
-                            //alert("用户名或密码错误！");
+
                         }
                     },
                     error: function () {

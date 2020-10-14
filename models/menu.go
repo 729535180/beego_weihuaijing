@@ -15,6 +15,7 @@ type Menu struct {
 	AdminUid   int       `json:"admin_uid"`
 	CreateTime time.Time `json:"create_time"`
 	UpdateTime time.Time `json:"update_time"`
+	Path       string    `json:"path"`
 }
 
 func (m *Menu) TableName() string {

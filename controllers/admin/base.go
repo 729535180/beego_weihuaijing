@@ -1,12 +1,15 @@
 package admin
 
 import (
+	"beego_weihuaijing/common"
+	"beego_weihuaijing/models"
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"math"
+	"strconv"
 	"strings"
 )
 
@@ -17,6 +20,8 @@ type baseController struct {
 	viewsTplName   string
 	rouleName      string
 	o              orm.Ormer
+	loginUser      models.AdminUser
+	showMenuId     string
 }
 
 func (b *baseController) Prepare() {
@@ -29,16 +34,93 @@ func (b *baseController) Prepare() {
 	b.o = orm.NewOrm()
 	b.TplName = b.viewsTplName
 	if b.rouleName == "login/index" || b.rouleName == "login/logout" {
-
+		if b.GetSession("admin_user_go") != nil {
+			b.History("已登录系统", "/admin/index")
+		}
 	} else {
 		if b.GetSession("admin_user_go") == nil {
 			b.History("未登录", "/admin/login/index")
 		} else {
+			userSess := b.GetSession("admin_user_go")
+			userJson, _ := json.Marshal(userSess)
+			_ = json.Unmarshal(userJson, &b.loginUser)
 
+			if b.rouleName == "admin/index" || b.rouleName == "admin/menu" {
+				//菜单权限
+				b.MenuRole()
+			} else {
+				//菜单权限
+				b.MenuRole()
+				//菜单权限判断
+				//logs.Error("menu_id====", b.showMenuId)
+				b.Roule()
+			}
+
+			//logs.Error("user_id====", userJson)
+			//logs.Error("user_id====", b.loginUser.Id)
 		}
 	}
-	logs.Error("rouleName====", b.rouleName)
+	//logs.Error("rouleName====", b.rouleName)
 
+}
+func (b *baseController) MenuRole() {
+
+	if b.loginUser.Level != 1 {
+		groupId := b.loginUser.GroupId
+		groupS := strings.Split(groupId, ",")
+		if groupId != "" {
+			var listH orm.ParamsList
+			menuIdS := "0"
+			num, err := b.o.QueryTable(new(models.Group).TableName()).Filter("id__in", groupS).Filter("status__in", 1).ValuesFlat(&listH, "Access")
+			if err == nil {
+				if num > 0 {
+					for _, value := range listH {
+						menuIdS = menuIdS + "," + value.(string)
+					}
+				}
+				//logs.Error("menuIdS", menuIdS)
+
+				menuS := strings.Split(menuIdS, ",")
+				num, _ := b.o.QueryTable(new(models.Menu).TableName()).Filter("id__in", menuS).Filter("status__in", 1).ValuesFlat(&listH, "Path")
+				if num > 0 {
+					for _, value := range listH {
+						menuIdS = menuIdS + "," + value.(string)
+					}
+				}
+
+				b.showMenuId = menuIdS
+
+			}
+
+		}
+	} else {
+
+		var listHa orm.ParamsList
+		menuIdS := "0"
+		num, _ := b.o.QueryTable(new(models.Menu).TableName()).Filter("status__in", 1).ValuesFlat(&listHa, "Id")
+		if num > 0 {
+			for _, valuet := range listHa {
+				//logs.Error("LEVELsssss====", reflect.TypeOf(valuet))
+				menuIdS = menuIdS + "," + strconv.Itoa(int(valuet.(int64)))
+			}
+
+		}
+
+		b.showMenuId = menuIdS
+	}
+
+}
+func (b *baseController) Roule() {
+	cate := models.Menu{Url: b.rouleName}
+	b.o.Read(&cate, "Url")
+	if cate.Id > 0 {
+		menuS := strings.Split(b.showMenuId, ",")
+		if !common.InArray(menuS, strconv.Itoa(cate.Id)) {
+			b.Erro("无些菜单权限", "权限管理", 0)
+		}
+	} else {
+		//b.Erro("无权限信息", "权限管理", 0)
+	}
 }
 
 type comReturn struct {
@@ -100,8 +182,9 @@ func (b *baseController) History(msg string, url string) {
 
 //获取用户IP地址
 func (b *baseController) getClientIp() string {
-	s := strings.Split(b.Ctx.Request.RemoteAddr, ":")
-	return s[0]
+	//s := strings.Split(b.Ctx.Request.RemoteAddr, ":")
+	//return s[0]
+	return b.Ctx.Request.RemoteAddr
 }
 
 /*

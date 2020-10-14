@@ -2,7 +2,7 @@ package admin
 
 import (
 	"beego_weihuaijing/models"
-	"github.com/astaxie/beego/logs"
+	"strings"
 )
 
 type AdminController struct {
@@ -18,9 +18,10 @@ type Menu struct {
 }
 
 func (a *AdminController) Index() {
-	logs.Error("views====", a.viewsTplName)
+	//logs.Error("views====", a.viewsTplName)
+	menuS := strings.Split(a.showMenuId, ",")
 	var list []models.Menu
-	a.o.QueryTable(new(models.Menu).TableName()).Filter("status__in", 1).Filter("pid", 0).OrderBy("-MenuSort").All(&list)
+	a.o.QueryTable(new(models.Menu).TableName()).Filter("id__in", menuS).Filter("status__in", 1).Filter("pid", 0).OrderBy("-MenuSort").All(&list)
 	a.Data["lists"] = list
 	a.Layout = ""
 	a.TplName = "admin/index.html"
@@ -28,9 +29,10 @@ func (a *AdminController) Index() {
 
 func (a *AdminController) Menu() {
 	menuId, _ := a.GetInt("menu")
+	menuS := strings.Split(a.showMenuId, ",")
 	//levelId, _ := a.GetInt("levelId")
 	var list []models.Menu
-	a.o.QueryTable(new(models.Menu).TableName()).Filter("status__in", 1).Filter("pid", menuId).OrderBy("-MenuSort").All(&list)
+	a.o.QueryTable(new(models.Menu).TableName()).Filter("id__in", menuS).Filter("status__in", 1).Filter("pid", menuId).OrderBy("-MenuSort").All(&list)
 
 	a.Data["json"] = list
 	a.ServeJSON()
