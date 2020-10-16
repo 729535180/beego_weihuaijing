@@ -1,0 +1,198 @@
+<!-- layout布局 开始 -->
+
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',title:'',fit:true,split:true,border:false">
+        <!-- datagrid表格 -->
+        <table data-toggle="topjui-datagrid"
+               data-options="id: 'productDg',
+               fitColumns:true,
+               remoteSort:false,
+                url: '../article/list?type=json',
+                ">
+            <thead>
+            <tr>
+
+                <th data-options="field:'title',title:'标题',sortable:true,width:100"></th>
+                <th data-options="field:'keywords',title:'关键词',sortable:true,width:100"></th>
+                <th data-options="field:'description',title:'描述',sortable:true,width:100"></th>
+                <th data-options="field:'read',title:'阅读次数',sortable:true,width:100"></th>
+                <th data-options="field:'tag_ids',title:'标签IDS',sortable:true,width:100"></th>
+
+                <th data-options="field:'status',title:'状态',sortable:true,width:100,formatter: function(value,row,index){
+                    if (value == '1'){
+                        return '启用';
+                    } else if (value == '2'){
+                        return '禁用';
+                    } else {
+                        return value;
+                    }
+			    }"></th>
+                <th data-options="field:'create_time',title:'创建时间',sortable:true,width:100"></th>
+                <th data-options="field:'update_time',title:'更新时间',sortable:true,width:100"></th>
+                <th data-options="field:'operate',title:'操作',formatter:operateFormatter,width:80"></th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<!-- layout布局 结束 -->
+
+<!-- 表格工具栏开始 -->
+<div id="productDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'productDg'
+       }">
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'openDialog',
+       extend: '#productDg-toolbar',
+       iconCls: 'fa fa-plus',
+       dialog:{
+           id:'userAddDialog',
+           title:'新增文章',
+           href:_ctx + '../../admin/article/add.html',
+           buttonsGroup:[
+               {text:'保存',url:_ctx + '../../admin/article/save.html',iconCls:'fa fa-plus',handler:'ajaxForm',btnCls:'topjui-btn-green'}
+           ]
+       }">新增</a>
+
+    <form id="queryForm" class="search-box">
+        <input type="text" name="title" data-toggle="topjui-textbox"
+               data-options="id:'title',prompt:'标题',width:100">
+
+        <input type="text" name="level"
+               data-toggle="topjui-combobox"
+               data-options="id:'level',prompt:'级别',width:100,data:[{value:1,text:'超级管理员'},{value:2,text:'普通用户'}]">
+        <input type="text" name="status"
+               data-toggle="topjui-combobox"
+               data-options="id:'status',prompt:'状态',width:100,data:[{value:1,text:'启用'},{value:2,text:'禁用'}]">
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'query',
+           iconCls:'fa fa-search',
+           btnCls:'topjui-btn-blue',
+           form:{id:'queryForm'},
+           grid:{type:'datagrid','id':'productDg'}">查询</a>
+    </form>
+</div>
+<!-- 表格工具栏结束 -->
+
+<script>
+
+
+    function progressFormatter(value, row, index) {
+        var htmlstr = '<div id="p" class="topjui-progressbar progressbar" data-options="value:' + value + '" style="width: 398px; height: 26px;">';
+        htmlstr += '<div class="progressbar-text" style="width: 398px; height: 26px; line-height: 26px;">' + value + '%</div>';
+        htmlstr += '<div class="progressbar-value" style="width: ' + value + '%; height: 26px; line-height: 26px;">';
+        htmlstr += '</div>';
+        htmlstr += '</div>';
+        return htmlstr;
+    }
+
+    function operateFormatter(value, row, index) {
+        var htmlstr = '<button class="layui-btn layui-btn-xs" onclick="openEditDiag(\'' + row.id + '\')">编辑</button>';
+        htmlstr += '<button class="layui-btn layui-btn-xs layui-btn-danger" onclick="deleteRow(\'' + row.id + '\')">删除</button>';
+        return htmlstr;
+    }
+
+    function openEditDiag(uuid) {
+        var $editDialog = $('<form  id="myDialog" method="get"></form>'); // 创建form表单元素
+        $editDialog.iDialog({
+            title: '编辑数据',
+            width: 950,
+            height: 500,
+            closed: false,
+            cache: false,
+            href: _ctx + '../../admin/article/edit.html?type=html&id=' + uuid,
+            modal: true,
+            buttons: [{
+                text: '保存',
+                iconCls: 'fa fa-save',
+                btnCls: 'topjui-btn-blue',
+                handler:ajaxSubmit // 调用下面自定义方法ajaxSubmit()
+            }, {
+                text: '关闭',
+                iconCls: 'fa fa-close',
+                btnCls: 'topjui-btn-red',
+                handler: function () {
+                    $editDialog.iDialog('close');
+                }
+            }],
+            onLoad: function () {
+
+                //加载表单数据
+                $.getJSON(_ctx + '../../admin/article/edit.html?id=' + uuid, function (data) {
+                    $editDialog.form('load', data);
+                    if(data.group_id != "") {
+                        szxx = data.group_id.split(',');
+                        $("[name='group_id']").each(function () {
+                            if (szxx.indexOf($(this).val()) > -1) {
+
+                                $(this).iCheckbox({checked:true});
+
+                            }
+                        })
+                    }
+
+                });
+            }
+        });
+    }
+    function ajaxSubmit() {
+
+        // 2 提交
+        // 2.1 方式一 上面 $('<form ></form>')
+        if($('#myDialog').form('validate')) {
+            var formData = $("#myDialog").serialize();
+            var url = _ctx + '../../admin/article/save.html';
+            $.post(url,formData,function (res) {
+                if (res.statusCode == 200) { // 后台返回状态值
+                    $.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
+                    $("#productDg").iDatagrid('reload');// 刷新下表格数据
+                    $('#myDialog').dialog('destroy');// 销毁dialog面板
+                } else {
+                    $.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
+                }
+            },'JSON')
+        }
+
+
+    }
+
+    function deleteRow(uuid) {
+        $.iMessager.confirm('确认对话框', '您确定删除所选的数据？', function (r) {
+            if(r){
+                var postData = { id: uuid}; // 请求中携带的JSON数据
+                var url =  _ctx + '../../admin/article/del.html';//请求的地址
+                $.post(url,postData,function (res) {
+                    $.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
+                    if(res.statusCode == 200){
+                        $("#productDg").iDatagrid('reload');//请求成功后刷新表格
+                    }
+                },"JSON")
+            }
+        });
+        // $.iMessager.alert('操作提示', '请根据具体情况编写代码，如ajax删除请求，请求失败提示，请求成功提示，请求成功后刷新表格等！', 'messager-info');
+    }
+
+    // 自定义方法
+    function myQuery() {
+        // 提示信息
+        $.iMessager.alert('自定义方法', '自定义方法被执行了！', 'messager-info');
+
+        var checkedRows = $('#productDg').iDatagrid('getChecked');
+        console.log(checkedRows);
+
+        var selectedRow = $('#productDg').iDatagrid('getSelected');
+        console.log(selectedRow);
+
+        // 提交参数查询表格数据
+        $('#productDg').iDatagrid('reload', {
+            name: $('#name').iTextbox('getValue'),
+            code: $('#code').iTextbox('getValue')
+        });
+    }
+
+</script>

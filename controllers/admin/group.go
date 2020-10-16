@@ -3,7 +3,7 @@ package admin
 import (
 	"beego_weihuaijing/models"
 	"fmt"
-	"github.com/astaxie/beego/orm"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -52,7 +52,7 @@ func (g *GroupController) Edit() {
 	} else {
 		id, _ := g.GetInt("id")
 		if id == 0 {
-			g.Erro("ID值不能为空", "", 0)
+			g.Erro("ID值不能为空", "", 0, g.resData)
 		} else {
 
 			cate := models.Group{Id: id}
@@ -77,37 +77,34 @@ func (g *GroupController) Save() {
 	if id == 0 {
 		post.CreateTime = time.Now()
 		if _, err := g.o.Insert(&post); err != nil {
-			g.Erro("插入数据错误"+err.Error(), "", 0)
+			g.Erro("插入数据错误"+err.Error(), "", 0, g.resData)
 		} else {
-			g.Succ("插入数据成功", "")
+			g.Succ("插入数据成功", "", g.resData)
 		}
 	} else {
 		post.Id = id
-		post.CreateTime = time.Now()
-		if _, err := g.o.Update(&post); err != nil {
+
+		if _, err := g.o.Update(&post, "GroupName", "Access", "Status", "UpdateTime"); err != nil {
 			g.History("更新数据出错"+err.Error(), "")
 		} else {
-			g.Succ("更新数据成功", "")
+			g.Succ("更新数据成功", "", g.resData)
 		}
 	}
 }
 func (g *GroupController) Del() {
 	id := g.Input().Get("id")
 	if id == "" {
-		g.Erro("ID值不能为空", "", 0)
+		g.Erro("ID值不能为空", "", 0, g.resData)
 	} else {
 		post := models.Group{}
 		post.UpdateTime = time.Now()
 		post.Status = 3
-
-		_, err := g.o.QueryTable("tb_group").Filter("id__in", id).Update(orm.Params{
-			"status":      3,
-			"update_time": time.Now(),
-		})
-		if err != nil {
-			g.History("删除数据出错"+err.Error(), "")
+		post.Id, _ = strconv.Atoi(id)
+		if _, err := g.o.Update(&post, "Status", "UpdateTime"); err != nil {
+			g.Erro("删除数据出错"+err.Error(), "", 0, g.resData)
 		} else {
-			g.Succ("删除数据成功", "")
+			g.Succ("删除数据成功", "", g.resData)
 		}
+
 	}
 }

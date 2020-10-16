@@ -5,7 +5,6 @@ import (
 	"beego_weihuaijing/models"
 	"crypto/md5"
 	"encoding/hex"
-	"encoding/json"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"math"
@@ -22,6 +21,7 @@ type baseController struct {
 	o              orm.Ormer
 	loginUser      models.AdminUser
 	showMenuId     string
+	resData        map[string]string
 }
 
 func (b *baseController) Prepare() {
@@ -38,27 +38,29 @@ func (b *baseController) Prepare() {
 			b.History("已登录系统", "/admin/index")
 		}
 	} else {
-		if b.GetSession("admin_user_go") == nil {
-			b.History("未登录", "/admin/login/index")
-		} else {
-			userSess := b.GetSession("admin_user_go")
-			userJson, _ := json.Marshal(userSess)
-			_ = json.Unmarshal(userJson, &b.loginUser)
-
-			if b.rouleName == "admin/index" || b.rouleName == "admin/menu" {
-				//菜单权限
-				b.MenuRole()
+		/*
+			if b.GetSession("admin_user_go") == nil {
+				b.History("未登录", "/admin/login/index")
 			} else {
-				//菜单权限
-				b.MenuRole()
-				//菜单权限判断
-				//logs.Error("menu_id====", b.showMenuId)
-				b.Roule()
-			}
+				userSess := b.GetSession("admin_user_go")
+				userJson, _ := json.Marshal(userSess)
+				_ = json.Unmarshal(userJson, &b.loginUser)
 
-			//logs.Error("user_id====", userJson)
-			//logs.Error("user_id====", b.loginUser.Id)
-		}
+				if b.rouleName == "admin/index" || b.rouleName == "admin/menu" {
+					//菜单权限
+					b.MenuRole()
+				} else {
+					//菜单权限
+					b.MenuRole()
+					//菜单权限判断
+					//logs.Error("menu_id====", b.showMenuId)
+					b.Roule()
+				}
+
+				//logs.Error("user_id====", userJson)
+				//logs.Error("user_id====", b.loginUser.Id)
+			}
+		*/
 	}
 	//logs.Error("rouleName====", b.rouleName)
 
@@ -116,54 +118,61 @@ func (b *baseController) Roule() {
 	if cate.Id > 0 {
 		menuS := strings.Split(b.showMenuId, ",")
 		if !common.InArray(menuS, strconv.Itoa(cate.Id)) {
-			b.Erro("无些菜单权限", "权限管理", 0)
+			b.Erro("无些菜单权限", "权限管理", 0, b.resData)
 		}
 	} else {
 		//b.Erro("无权限信息", "权限管理", 0)
 	}
 }
 
-type comReturn struct {
-	StatusCode int    `json:"statusCode"`
-	Title      string `json:"title"`
-	Message    string `json:"message"`
-}
-
 //topjui  操作成功返回
-func (b *baseController) Succ(msg string, title string) {
-	re := new(comReturn)
+func (b *baseController) Succ(msg string, title string, data map[string]string) {
+
+	re := make(map[string]string)
 	if msg == "" {
-		re.Message = "恭喜你，操作成功！"
+		re["message"] = "恭喜你，操作成功！"
 	} else {
-		re.Message = msg
+		re["message"] = msg
 	}
 	if title == "" {
-		re.Title = "操作提示"
+		re["title"] = "操作提示"
 	} else {
-		re.Title = title
+		re["title"] = title
 	}
-	re.StatusCode = 200
+
+	/*使用键输出地图值 */
+	for country := range data {
+		re[country] = data[country]
+	}
+
+	re["statusCode"] = "200"
 	b.Data["json"] = re
 	b.ServeJSON()
 }
 
 //topjui  操作失败返回
-func (b *baseController) Erro(msg string, title string, code int) {
-	re := new(comReturn)
+func (b *baseController) Erro(msg string, title string, code int, data map[string]string) {
+	re := make(map[string]string)
 	if msg == "" {
-		re.Message = "操作失败！"
+		re["message"] = "恭喜你，操作成功！"
 	} else {
-		re.Message = msg
+		re["message"] = msg
 	}
 	if title == "" {
-		re.Title = "操作提示"
+		re["title"] = "操作提示"
 	} else {
-		re.Title = title
+		re["title"] = title
 	}
+
+	/*使用键输出地图值 */
+	for country := range data {
+		re[country] = data[country]
+	}
+
 	if code == 0 {
-		re.StatusCode = 404
+		re["statusCode"] = "404"
 	} else {
-		re.StatusCode = code
+		re["statusCode"] = strconv.Itoa(code)
 	}
 
 	b.Data["json"] = re

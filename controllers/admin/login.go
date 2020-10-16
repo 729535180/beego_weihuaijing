@@ -17,19 +17,19 @@ func (l *LoginController) Index() {
 		l.o.Read(&user, "Accounts")
 
 		if user.Password == "" {
-			l.Erro("账号不存在", "操作失败", 0)
+			l.Erro("账号不存在", "操作失败", 0, l.resData)
 		}
 
 		if MyMd5(password) != user.Password {
-			l.Erro("密码错误", "操作失败", 0)
+			l.Erro("密码错误", "操作失败", 0, l.resData)
 		}
 		user.LastIp = l.getClientIp()
 
 		user.LoginCount = user.LoginCount + 1
 		if _, err := l.o.Update(&user, "LastIp", "LoginCount"); err != nil {
-			l.Erro("登录异常", "操作失败", 0)
+			l.Erro("登录异常", "操作失败", 0, l.resData)
 		} else {
-			l.Succ("登录成功", "操作成功")
+			l.Succ("登录成功", "操作成功", l.resData)
 		}
 		l.SetSession("admin_user_go", user)
 

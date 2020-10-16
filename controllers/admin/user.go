@@ -3,7 +3,7 @@ package admin
 import (
 	"beego_weihuaijing/models"
 	"fmt"
-	"github.com/astaxie/beego/orm"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -22,7 +22,7 @@ func (u *UserController) GroupData() error {
 
 func (u *UserController) Add() {
 	if err := u.GroupData(); err != nil {
-		u.Erro("读取数据出错"+err.Error(), "", 0)
+		u.Erro("读取数据出错"+err.Error(), "", 0, u.resData)
 	}
 	u.Data["password"] = true
 	u.TplName = u.controllerName + "/from.html"
@@ -31,14 +31,14 @@ func (u *UserController) Edit() {
 	lx := u.Input().Get("type")
 	if lx == "html" {
 		if err := u.GroupData(); err != nil {
-			u.Erro("读取数据出错"+err.Error(), "", 0)
+			u.Erro("读取数据出错"+err.Error(), "", 0, u.resData)
 		}
 		u.Data["password"] = false
 		u.TplName = u.controllerName + "/from.html"
 	} else {
 		id, _ := u.GetInt("id")
 		if id == 0 {
-			u.Erro("ID值不能为空", "", 0)
+			u.Erro("ID值不能为空", "", 0, u.resData)
 		} else {
 
 			cate := models.AdminUser{Id: id}
@@ -70,24 +70,24 @@ func (u *UserController) Save() {
 	if id == 0 {
 		post.CreateTime = time.Now()
 		if _, err := u.o.Insert(&post); err != nil {
-			u.Erro("插入数据错误"+err.Error(), "", 0)
+			u.Erro("插入数据错误"+err.Error(), "", 0, u.resData)
 		} else {
-			u.Succ("插入数据成功", "")
+			u.Succ("插入数据成功", "", u.resData)
 		}
 	} else {
 		post.Id = id
 		post.UpdateTime = time.Now()
 		if post.Password == "" {
 			if _, err := u.o.Update(&post, "Accounts", "Username", "GroupId", "Level", "Status", "UpdateTime"); err != nil {
-				u.Erro("更新数据出错"+err.Error(), "", 0)
+				u.Erro("更新数据出错"+err.Error(), "", 0, u.resData)
 			} else {
-				u.Succ("更新数据成功", "")
+				u.Succ("更新数据成功", "", u.resData)
 			}
 		} else {
 			if _, err := u.o.Update(&post, "Accounts", "Password", "Username", "GroupId", "Level", "Status", "UpdateTime"); err != nil {
-				u.Erro("更新数据出错"+err.Error(), "", 0)
+				u.Erro("更新数据出错"+err.Error(), "", 0, u.resData)
 			} else {
-				u.Succ("更新数据成功", "")
+				u.Succ("更新数据成功", "", u.resData)
 			}
 		}
 	}
@@ -131,20 +131,17 @@ func (u *UserController) List() {
 func (u *UserController) Del() {
 	id := u.Input().Get("id")
 	if id == "" {
-		u.Erro("ID值不能为空", "", 0)
+		u.Erro("ID值不能为空", "", 0, u.resData)
 	} else {
 		post := models.Menu{}
 		post.UpdateTime = time.Now()
 		post.Status = 3
-
-		_, err := u.o.QueryTable("tb_admin_user").Filter("id__in", id).Update(orm.Params{
-			"status":      3,
-			"update_time": time.Now(),
-		})
-		if err != nil {
-			u.History("删除数据出错"+err.Error(), "")
+		post.Id, _ = strconv.Atoi(id)
+		if _, err := u.o.Update(&post, "Status", "UpdateTime"); err != nil {
+			u.Erro("删除数据出错"+err.Error(), "", 0, u.resData)
 		} else {
-			u.Succ("删除数据成功", "")
+			u.Succ("删除数据成功", "", u.resData)
 		}
+
 	}
 }

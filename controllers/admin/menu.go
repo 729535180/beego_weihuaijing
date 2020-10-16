@@ -2,7 +2,6 @@ package admin
 
 import (
 	"beego_weihuaijing/models"
-	"github.com/astaxie/beego/orm"
 	"strconv"
 	"time"
 )
@@ -96,7 +95,7 @@ func (m *MenuController) Edit() {
 	} else {
 		id, _ := m.GetInt("id")
 		if id == 0 {
-			m.Erro("ID值不能为空", "", 0)
+			m.Erro("ID值不能为空", "", 0, m.resData)
 		} else {
 
 			cate := models.Menu{Id: id}
@@ -136,9 +135,9 @@ func (m *MenuController) Save() {
 	if id == 0 {
 		post.CreateTime = time.Now()
 		if _, err := m.o.Insert(&post); err != nil {
-			m.Erro("插入数据错误"+err.Error(), "", 0)
+			m.Erro("插入数据错误"+err.Error(), "", 0, m.resData)
 		} else {
-			m.Succ("插入数据成功", "")
+			m.Succ("插入数据成功", "", m.resData)
 			//m.History("插入数据成功", "/admin/index.html")
 		}
 	} else {
@@ -147,7 +146,7 @@ func (m *MenuController) Save() {
 		if _, err := m.o.Update(&post); err != nil {
 			m.History("更新数据出错"+err.Error(), "")
 		} else {
-			m.Succ("更新数据成功", "")
+			m.Succ("更新数据成功", "", m.resData)
 			//m.History("插入数据成功", "/admin/index.html")
 		}
 	}
@@ -157,21 +156,17 @@ func (m *MenuController) Save() {
 func (m *MenuController) Del() {
 	id := m.Input().Get("id")
 	if id == "" {
-		m.Erro("ID值不能为空", "", 0)
+		m.Erro("ID值不能为空", "", 0, m.resData)
 	} else {
 		post := models.Menu{}
 		post.UpdateTime = time.Now()
 		post.Status = 3
-
-		_, err := m.o.QueryTable("tb_menu").Filter("id__in", id).Update(orm.Params{
-			"status":      3,
-			"update_time": time.Now(),
-		})
-		if err != nil {
-			m.History("删除数据出错"+err.Error(), "")
+		post.Id, _ = strconv.Atoi(id)
+		if _, err := m.o.Update(&post, "Status", "UpdateTime"); err != nil {
+			m.Erro("删除数据出错"+err.Error(), "", 0, m.resData)
 		} else {
-			m.Succ("删除数据成功", "")
-			//m.History("插入数据成功", "/admin/index.html")
+			m.Succ("删除数据成功", "", m.resData)
 		}
+
 	}
 }

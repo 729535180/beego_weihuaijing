@@ -11,6 +11,7 @@ func init() {
 	beego.Router("/admin/login/index", &admin.LoginController{}, "*:Index")
 	beego.Router("/admin/index", &admin.AdminController{}, "*:Index")
 	beego.Router("/admin/menu", &admin.AdminController{}, "*:Menu")
+	beego.Router("/admin/upload", &admin.AdminController{}, "*:Upload")
 	ns := beego.NewNamespace("/admin",
 		// 后台页面
 		beego.NSRouter("/", &admin.AdminController{}, "*:Index"),
@@ -53,6 +54,24 @@ func init() {
 		//权限管理
 		beego.NSNamespace("/rule"), //beego.NSRouter("/", &controllers.AdminRuleController{},"*:Index"),
 
+		//CMS 分类
+		beego.NSNamespace("/classify",
+			beego.NSRouter("/", &admin.ClassifyController{}, "*:List"),
+			beego.NSRouter("/list", &admin.ClassifyController{}, "*:List"),
+			beego.NSRouter("/add", &admin.ClassifyController{}, "*:Add"),
+			beego.NSRouter("/save", &admin.ClassifyController{}, "*:Save"),
+			beego.NSRouter("/edit", &admin.ClassifyController{}, "*:Edit"),
+			beego.NSRouter("/del", &admin.ClassifyController{}, "*:Del"),
+		),
+		//CMS 文章
+		beego.NSNamespace("/article",
+			beego.NSRouter("/", &admin.ArticleController{}, "*:List"),
+			beego.NSRouter("/list", &admin.ArticleController{}, "*:List"),
+			beego.NSRouter("/add", &admin.ArticleController{}, "*:Add"),
+			beego.NSRouter("/save", &admin.ArticleController{}, "*:Save"),
+			beego.NSRouter("/edit", &admin.ArticleController{}, "*:Edit"),
+			beego.NSRouter("/del", &admin.ArticleController{}, "*:Del"),
+		),
 	)
 	beego.AddNamespace(ns)
 	//beego.AutoRouter(&admin.AdminController{})
